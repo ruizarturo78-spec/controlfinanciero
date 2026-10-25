@@ -1,0 +1,27 @@
+{
+  "id": "./",
+  "name": "Mi Control Financiero",
+  "short_name": "Mi Finanzas",
+  "description": "Control de ingresos, egresos, presupuesto y deudas en pesos colombianos.",
+  "lang": "es-CO",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f4f6fc",
+  "theme_color": "#142644",
+  "icons": [
+    {
+      "src": "./icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

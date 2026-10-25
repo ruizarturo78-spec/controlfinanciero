@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#142644">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Mi Finanzas">
+  <meta name="description" content="Control personal de ingresos, egresos, presupuestos y deudas en pesos colombianos.">
+  <title>Mi Control Financiero</title>
+  <link rel="manifest" href="./manifest.json">
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="apple-touch-icon" href="./icon-192.svg">
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand-row">
+      <div class="brand-mark" aria-hidden="true"><span>🐷</span><i>$</i></div>
+      <div class="brand-copy">
+        <p class="eyebrow">FINANZAS PERSONALES</p>
+        <h1>Mi Control<br class="mobile-break"> Financiero</h1>
+      </div>
+      <button class="header-icon" id="notificationsBtn" aria-label="Avisos" title="Avisos">♧<span class="notification-dot"></span></button>
+      <button class="header-icon" id="settingsBtn" aria-label="Configuración" title="Configuración">⚙</button>
+    </div>
+    <div class="period-selector">
+      <div class="period-label"><span>▦</span><span>Ciclo actual</span></div>
+      <div class="period-pill"><span id="periodLabel">Cargando período…</span><span>⌄</span></div>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <section class="overview-card">
+      <div class="section-title"><span class="section-icon purple">▥</span><h2>Resumen del ciclo</h2></div>
+      <div class="overview-content">
+        <div class="donut-wrap">
+          <div class="donut" id="budgetDonut"><div class="donut-center"><strong id="budgetPercent">0%</strong><span>del presupuesto<br>usado</span></div></div>
+        </div>
+        <div class="overview-metrics">
+          <div class="metric-row"><span class="metric-symbol green">↑</span><span class="metric-name">Ingresos</span><strong id="incomeTotal">$ 0</strong></div>
+          <div class="metric-row"><span class="metric-symbol red">↓</span><span class="metric-name">Egresos</span><strong id="expenseTotal">$ 0</strong></div>
+          <div class="metric-row"><span class="metric-symbol yellow">⚖</span><span class="metric-name">Deudas</span><strong id="debtPaymentsTotal">$ 0</strong></div>
+          <div class="available-pill"><span>🐷</span><span>Disponible</span><strong id="balance">$ 0</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-card budget-preview">
+      <div class="section-title"><span class="section-icon purple">◎</span><h2>Presupuesto por categoría</h2><button class="link-button" data-go="budget">Ver detalle ›</button></div>
+      <div id="budgetOverview"></div>
+    </section>
+
+    <section class="content-card">
+      <div class="section-title"><span class="section-icon purple">✧</span><h2>Acciones rápidas</h2></div>
+      <div class="quick-actions">
+        <button class="quick-action quick-income" data-quick="income"><span class="quick-symbol">＋</span><strong>Nuevo<br>ingreso</strong></button>
+        <button class="quick-action quick-expense" data-quick="expense"><span class="quick-symbol">−</span><strong>Nuevo<br>egreso</strong></button>
+        <button class="quick-action quick-debt" data-go="debts"><span class="quick-symbol">▣</span><strong>Registrar<br>deuda</strong></button>
+        <button class="quick-action quick-budget" data-go="budget"><span class="quick-symbol">◎</span><strong>Ajustar<br>presupuesto</strong></button>
+      </div>
+    </section>
+
+    <section id="movements" class="view hidden">
+      <div class="section-title page-title"><span class="section-icon white-icon">☷</span><h2>Movimientos</h2><button class="header-action" id="searchToggle" aria-label="Buscar movimientos">⌕</button></div>
+      <div class="filter-pills" id="movementFilters">
+        <button class="filter-pill selected" data-filter="all">Todos</button>
+        <button class="filter-pill income-filter" data-filter="income">Ingresos</button>
+        <button class="filter-pill expense-filter" data-filter="expense">Egresos</button>
+      </div>
+      <div id="movementSearchWrap" class="search-wrap hidden"><input id="movementSearch" type="search" placeholder="Buscar movimiento…"></div>
+      <div class="content-card"><p class="period-caption" id="historyPeriod"></p><div id="movementHistory"></div></div>
+      <form id="movementForm" class="content-card form-card">
+        <h3 id="movementFormTitle">Nuevo movimiento</h3>
+        <label for="movementType">Tipo</label>
+        <select id="movementType" required><option value="expense">Egreso</option><option value="income">Ingreso</option></select>
+        <label for="movementAmount">Valor en COP</label>
+        <input id="movementAmount" type="number" min="1" step="1" inputmode="numeric" placeholder="Ej. 250000" required>
+        <label for="movementCategory">Categoría</label>
+        <select id="movementCategory" required></select>
+        <label for="movementDate">Fecha</label>
+        <input id="movementDate" type="date" required>
+        <label for="movementDescription">Descripción</label>
+        <input id="movementDescription" type="text" maxlength="100" placeholder="Ej. Mercado semanal">
+        <button class="primary-button" type="submit">Guardar movimiento</button>
+        <p id="movementMessage" class="form-message" role="status"></p>
+      </form>
+    </section>
+
+    <section id="budget" class="view hidden">
+      <div class="section-title page-title"><span class="section-icon white-icon">◎</span><h2>Presupuesto</h2></div>
+      <div class="cycle-card"><span>Ciclo:</span><strong id="budgetPeriodLabel"></strong></div>
+      <div class="budget-total-card"><div><span>◉</span><p>Total presupuestado</p><strong id="budgetTotal">$ 0</strong></div><button id="editBudgetBtn" aria-label="Editar presupuesto">✎</button></div>
+      <div class="content-card"><div id="budgetDetails"></div></div>
+      <form id="budgetForm" class="content-card form-card"><h3>Editar límites por categoría</h3><div id="budgetFields"></div><button class="primary-button" type="submit">Guardar presupuesto</button><p id="budgetMessage" class="form-message" role="status"></p></form>
+    </section>
+
+    <section id="debts" class="view hidden">
+      <div class="section-title page-title"><span class="section-icon white-icon">▤</span><h2>Deudas</h2><button class="header-action" id="newDebtBtn" aria-label="Nueva deuda">＋</button></div>
+      <div class="debt-summary content-card"><p>Saldo total pendiente</p><h2 id="debtTotal">$ 0</h2></div>
+      <form id="debtForm" class="content-card form-card"><h3>Registrar una deuda</h3>
+        <label for="debtName">Banco o acreedor</label><input id="debtName" type="text" maxlength="80" placeholder="Ej. Tarjeta de crédito" required>
+        <label for="debtBalance">Saldo pendiente en COP</label><input id="debtBalance" type="number" min="1" step="1" inputmode="numeric" placeholder="Ej. 5000000" required>
+        <label for="debtPayment">Cuota mensual en COP</label><input id="debtPayment" type="number" min="0" step="1" inputmode="numeric" placeholder="Ej. 350000" value="0" required>
+        <label for="debtDueDate">Día de vencimiento (opcional)</label><input id="debtDueDate" type="number" min="1" max="31" placeholder="Ej. 15">
+        <button class="primary-button" type="submit">Guardar deuda</button><p id="debtMessage" class="form-message" role="status"></p>
+      </form>
+      <div class="content-card"><div class="section-title"><h2>Deudas activas</h2></div><div id="debtList"></div></div>
+    </section>
+
+    <section id="reports" class="view hidden">
+      <div class="section-title page-title"><span class="section-icon white-icon">▥</span><h2>Reportes</h2></div>
+      <div class="content-card report-card"><h3>Flujo del ciclo</h3><p id="reportPeriod" class="muted"></p><div class="report-line"><div><span>Ingresos</span><strong id="reportIncome">$ 0</strong></div><div class="track"><div id="reportIncomeBar" class="track-fill income-fill"></div></div></div><div class="report-line"><div><span>Egresos</span><strong id="reportExpenses">$ 0</strong></div><div class="track"><div id="reportExpenseBar" class="track-fill expense-fill"></div></div></div><div class="report-line"><div><span>Pagos de deuda</span><strong id="reportDebtPayments">$ 0</strong></div><div class="track"><div id="reportDebtBar" class="track-fill debt-fill"></div></div></div></div>
+      <div class="report-stat-grid"><div class="report-stat savings"><span>🐷</span><p>Disponible del ciclo</p><strong id="reportBalance">$ 0</strong></div><div class="report-stat rate"><span>▱</span><p>Uso del presupuesto</p><strong id="reportBudgetRate">0%</strong></div></div>
+      <div class="content-card"><h3>Gastos por categoría</h3><div id="categoryReport"></div></div>
+    </section>
+
+    <section id="settings" class="view hidden">
+      <div class="section-title page-title"><span class="section-icon white-icon">⚙</span><h2>Configuración y datos</h2></div>
+      <div class="content-card form-card"><h3>Respaldo de información</h3><p class="muted">Guarda una copia de tus movimientos, presupuestos y deudas.</p><button id="exportBtn" class="secondary-button">Exportar respaldo JSON</button><button id="exportCsvBtn" class="secondary-button">Exportar movimientos CSV</button><button id="importBtn" class="secondary-button">Restaurar respaldo JSON</button><input id="importFile" type="file" accept=".json,application/json" hidden><p id="backupMessage" class="form-message" role="status"></p></div>
+      <div class="content-card form-card"><h3>Privacidad</h3><p class="muted">Los datos se guardan en el almacenamiento local de este navegador. No se sincronizan automáticamente entre dispositivos.</p></div>
+    </section>
+  </main>
+
+  <button class="floating-add" id="floatingAdd" aria-label="Agregar movimiento">＋</button>
+  <nav class="bottom-nav" aria-label="Navegación principal">
+    <button class="nav-item active" data-tab="dashboard"><span>⌂</span><small>Inicio</small></button>
+    <button class="nav-item" data-tab="movements"><span>☷</span><small>Movimientos</small></button>
+    <button class="nav-item" data-tab="budget"><span>◷</span><small>Presupuesto</small></button>
+    <button class="nav-item" data-tab="debts"><span>▤</span><small>Deudas</small></button>
+    <button class="nav-item" data-tab="reports"><span>▥</span><small>Reportes</small></button>
+  </nav>
+
+  <script src="./app.js"></script>
+  <script>
+    if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
+      window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(console.error));
+    }
+  </script>
+</body>
+</html>
